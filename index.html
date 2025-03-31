@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="auth-container" style="display: none;">
+        <button id="login-btn">Login with Google</button>
+        <p id="error-message" style="color: red;"></p>
+    </div>
+    
+    <div id="user-info" style="display: none;">
+        <h1 id="user-name"></h1>
+        <button id="logout-btn">Logout</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
+
+        const firebaseConfig = {
+            apiKey: process.env.FIREBASE_API_KEY,
+            authDomain: "auth-caf27.firebaseapp.com",
+            projectId: "auth-caf27",
+            storageBucket: "auth-caf27.firebasestorage.app",
+            messagingSenderId: "419446307195",
+            appId: "1:419446307195:web:95404a4f931bcbd0f025de"
+        }
+
+        const app = initializeApp(firebaseConfig)
+        const auth = getAuth()
+        const provider = new GoogleAuthProvider()
+
+        const loginBtn = document.getElementById("login-btn")
+        const logoutBtn = document.getElementById("logout-btn")
+        const authContainer = document.getElementById("auth-container")
+        const userInfo = document.getElementById("user-info")
+        const userName = document.getElementById("user-name")
+        const errorMessage = document.getElementById("error-message")
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userName.textContent = `Hello, ${user.displayName}`
+                authContainer.style.display = "none"
+                userInfo.style.display = "block"
+            } else {
+                authContainer.style.display = "block"
+                userInfo.style.display = "none"
+            }
+        })
+
+        loginBtn.addEventListener("click", () => {
+            signInWithPopup(auth, provider)
+                .then(result => {
+                    const user = result.user
+                    userName.textContent = `Hello, ${user.displayName}`
+                    authContainer.style.display = "none"
+                    userInfo.style.display = "block"
+                })
+                .catch(error => {
+                    console.error("Login Error: ", error)
+                    errorMessage.textContent = error.message
+                })
+        })
+
+        logoutBtn.addEventListener("click", () => {
+            signOut(auth)
+                .then(() => {
+                    authContainer.style.display = "block"
+                    userInfo.style.display = "none"
+                })
+                .catch(error => {
+                    console.error("Logout Error: ", error)
+                })
+        })
+
+    </script>
+</body>
+</html>
